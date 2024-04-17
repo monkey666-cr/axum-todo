@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{io, sync::Arc};
 
 use axum::{routing::get, Extension, Router};
 use deadpool_postgres::Runtime;
@@ -20,6 +20,12 @@ pub use response::Response;
 
 #[tokio::main]
 async fn main() {
+    if std::env::var_os("RUST_LOG").is_none() {
+        std::env::set_var("RUST_LOG", "axum-todo=debug");
+    }
+
+    tracing_subscriber::fmt().with_writer(io::stdout).init();
+
     // 解析.env文件
     dotenv().ok();
 
@@ -45,6 +51,8 @@ async fn main() {
         .layer(Extension(Arc::new(AppState { pool })));
 
     let listener = tokio::net::TcpListener::bind(&cfg.web.addr).await.unwrap();
+
+    tracing::info!("服务器监听于: {}", &cfg.web.addr);
 
     axum::serve(listener, app).await.unwrap();
 }
