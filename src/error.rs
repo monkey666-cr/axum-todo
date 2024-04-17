@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use axum::{response::IntoResponse, Json};
 
 use crate::Response;
@@ -51,6 +53,18 @@ impl AppError {
 
     pub fn not_found() -> Self {
         Self::from_str("不存在的记录", AppErrorType::NotFound)
+    }
+}
+
+impl From<deadpool_postgres::PoolError> for AppError {
+    fn from(err: deadpool_postgres::PoolError) -> Self {
+        Self::db_error(err)
+    }
+}
+
+impl From<tokio_postgres::Error> for AppError {
+    fn from(err: tokio_postgres::Error) -> Self {
+        Self::db_error(err)
     }
 }
 
