@@ -1,6 +1,6 @@
-use std::{io, sync::Arc};
+use std::io;
 
-use axum::{routing::get, Extension, Router};
+use axum::{routing::get, Router};
 use deadpool_postgres::Runtime;
 use dotenv::dotenv;
 
@@ -48,7 +48,7 @@ async fn main() {
                 .put(handler::todo_list::update)
                 .delete(handler::todo_list::delete),
         )
-        .layer(Extension(Arc::new(AppState { pool })));
+        .with_state(AppState { pool });
 
     let listener = tokio::net::TcpListener::bind(&cfg.web.addr).await.unwrap();
 

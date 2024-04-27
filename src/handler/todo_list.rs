@@ -1,6 +1,4 @@
-use std::sync::Arc;
-
-use axum::{extract::Path, Extension, Json};
+use axum::{extract::Path, extract::State, Json};
 
 use crate::{
     db::todo_list,
@@ -11,7 +9,7 @@ use crate::{
 };
 
 pub async fn create(
-    Extension(state): Extension<Arc<AppState>>,
+    State(state): State<AppState>,
     Json(payload): Json<form::CreateTodoList>,
 ) -> Result<Json<Response<TodoListID>>> {
     let client = state.pool.get().await.map_err(AppError::from)?;
@@ -19,7 +17,7 @@ pub async fn create(
     Ok(Json(Response::ok(result)))
 }
 
-pub async fn all(Extension(state): Extension<Arc<AppState>>) -> Result<Json<Response<Vec<TodoList>>>> {
+pub async fn all(State(state): State<AppState>) -> Result<Json<Response<Vec<TodoList>>>> {
     let client = state.pool.get().await.map_err(AppError::from)?;
     let result = todo_list::all(&client).await?;
 
@@ -27,7 +25,7 @@ pub async fn all(Extension(state): Extension<Arc<AppState>>) -> Result<Json<Resp
 }
 
 pub async fn find(
-    Extension(state): Extension<Arc<AppState>>,
+    State(state): State<AppState>,
     Path(list_id): Path<i32>,
 ) -> Result<Json<Response<TodoList>>> {
     let client = state.pool.get().await.map_err(AppError::from)?;
@@ -36,7 +34,7 @@ pub async fn find(
 }
 
 pub async fn delete(
-    Extension(state): Extension<Arc<AppState>>,
+    State(state): State<AppState>,
     Path(list_id): Path<i32>,
 ) -> Result<Json<Response<bool>>> {
     let mut client = state.pool.get().await.map_err(AppError::from)?;
@@ -47,7 +45,7 @@ pub async fn delete(
 }
 
 pub async fn update(
-    Extension(state): Extension<Arc<AppState>>,
+    State(state): State<AppState>,
     Json(payload): Json<form::UpdateTodoList>,
 ) -> Result<Json<Response<bool>>> {
     let client = state.pool.get().await.map_err(AppError::from)?;
